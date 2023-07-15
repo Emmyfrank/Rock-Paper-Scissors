@@ -1,68 +1,183 @@
+const userScoreCard = document.querySelector(".score .user");
+const compScoreCard = document.querySelector(".score .comp");
+const rockButton = document.querySelector(".options .r");
+const paperButton = document.querySelector(".options .p");
+const scissorsButton = document.querySelector(".options .s");
+const status = document.querySelector(".status");
+const endStatus = document.querySelector(".game-end");
+const resetButton = document.querySelector("#reset");
 
-// 1 computer choice function
-function getComputerChoice() {
-  const choices = ["Rock", "Paper", "Scissor"];
-  let randomIndex = Math.floor(Math.random() * choices.length);
-  return choices[randomIndex];
+let userScore = 0;
+let compScore = 0;
+let statusString;
+let userChoice;
+let rounds = 0;
+
+let compChoice = randChoice();
+
+main();
+
+function randChoice() {
+	switch (Math.floor(Math.random() * 3) + 1) {
+		case 1:
+			return "r";
+		case 2:
+			return "p";
+		case 3:
+			return "s";
+	}
 }
 
-// 2 function to determine winner
+function main() {
+	rockButton.addEventListener("click", () => {
+		userChoice = "r";
+		rounds++;
+		checkDecision(userChoice);
+		compChoice = randChoice();
+		checkRoundOver();
+	});
 
-let playerScore = 0;
-let computerScore = 0;
+	paperButton.addEventListener("click", () => {
+		userChoice = "p";
+		rounds++;
+		checkDecision(userChoice);
+		compChoice = randChoice();
+		checkRoundOver();
+	});
 
-function determineWinner(playerChoice, computerChoice) {
-  if (playerChoice === computerChoice) {
-      return "It's a tie";
-  } else if (
-      (playerChoice === "Rock" && computerChoice === "Scissor") ||
-      (playerChoice === "Paper" && computerChoice === "Rock") ||
-      (playerChoice === "Scissor" && computerChoice === "Paper")
-  ) {
-      playerScore++;
-      return `You win! ${playerChoice} beats ${computerChoice}`;
-  } else {
-      computerScore++;
-      return `Oops, you lose! ${computerChoice} beats ${playerChoice}`;
-  }
+	scissorsButton.addEventListener("click", () => {
+		userChoice = "s";
+		rounds++;
+		checkDecision(userChoice);
+		compChoice = randChoice();
+		checkRoundOver();
+	});
+
+	resetButton.addEventListener("click", reset);
 }
 
-// playing game function
-
-function game(playerChoice) {
-
-  const computerChoice = getComputerChoice();
-  const result = determineWinner(playerChoice, computerChoice);
-  
-  console.clear();
-  
-  console.log(`Player choice: ${playerChoice}`);
-  console.log(`Computer choice: ${computerChoice}`);
-  console.log(`Player score: ${playerScore}`);
-  console.log(`Computer score: ${computerScore}`);
-  console.log(result);
-  console.log("\n \n");
+function checkDecision(userChoice) {
+	switch (userChoice + compChoice) {
+		case "rs":
+		case "pr":
+		case "sp":
+			win(userChoice);
+			break;
+		case "rr":
+		case "pp":
+		case "ss":
+			draw(userChoice);
+			break;
+		case "rp":
+		case "sr":
+		case "ps":
+			loss(compChoice);
+			break;
+	}
+	userScoreCard.innerHTML = userScore;
+	compScoreCard.innerHTML = compScore;
 }
 
-// 4 while loop to iterate until score be 5 points
+function win(user) {
+	userScore++;
+	switch (user) {
+		case "r":
+			statusString = " you won! Rock worn Scissors. ";
+			break;
+		case "p":
+			statusString = "You won! Paper beats Rock. ";
+			break;
+		case "s":
+			statusString = "Scissors won Paper. you won ";
+			break;
+	}
+	status.innerHTML =
+		`Round ${rounds}: ` + statusString + "<strong>You</strong> won <b>🔥</b>.";
 
-let round = 1;
-
-while (playerScore < 5 && computerScore < 5) {
-
-  let playerChoice1 = prompt("Enter :\nRock,\n Paper,\n or Scissor\n: ");
-  let playerChoice = playerChoice1.charAt(0).toUpperCase() + playerChoice1.slice(1).toLowerCase();
-  game(playerChoice);
-
-  round++;
+	document.querySelector(`.${userChoice}`).classList.add("win");
+	setTimeout(
+		() => document.querySelector(`.${userChoice}`).classList.remove("win"),
+		600
+	);
 }
 
-// 5 if clause to determine a game winner.
+function loss(comp) {
+	compScore++;
+	switch (comp) {
+		case "r":
+			statusString = "Rock won Scissors. ";
+			break;
+		case "p":
+			statusString = "Paper won Rocks. ";
+			break;
+		case "s":
+			statusString = "Scissors won Paper. ";
+			break;
+	}
+	status.innerHTML =
+		`Round ${rounds}: ` +
+		statusString +
+		"<strong>Comp</strong> wins <b>🤖</b>.";
+	document.querySelector(`.${userChoice}`).classList.add("loss");
+	setTimeout(
+		() => document.querySelector(`.${userChoice}`).classList.remove("loss"),
+		600
+	);
+}
 
-if (playerScore === computerScore) {
-  console.log("Game over, it's a draw");
-} else if (playerScore > computerScore) {
-  console.log("Congratulations! You win the game!");
-} else {
-  console.log("Sorry, you lose the game!");
+function draw(user) {
+	switch (user) {
+		case "r":
+			statusString = "you all played Rocks. ";
+			break;
+		case "p":
+			statusString = "you all played Papers. ";
+			break;
+		case "s":
+			statusString = "you all played Scissors.";
+			break;
+	}
+	status.innerHTML =
+		`Round ${rounds}: ` + statusString + "<strong>It's a tie</strong> <b>😑</b>.";
+	document.querySelector(`.${userChoice}`).classList.add("draw");
+	setTimeout(
+		() => document.querySelector(`.${userChoice}`).classList.remove("draw"),
+		600
+	);
+}
+
+function reset() {
+	userScore = 0;
+	compScore = 0;
+	if (
+		status.innerText ===
+			"Make a choice. Don't worry, the computer made its choice already." ||
+		status.innerHTML === "New Game! Good luck this time <b>👍🏼</b>." ||
+		status.innerHTML === "Game has  reseted <b>😉</b>."
+	) {
+		status.innerHTML = "Game has reseted <b>😉</b>.";
+	} else status.innerHTML = "New Game! luck at this time <b>👍🏼</b>.";
+	userScoreCard.innerHTML = userScore;
+	compScoreCard.innerHTML = compScore;
+	rockButton.disabled = false;
+	paperButton.disabled = false;
+	scissorsButton.disabled = false;
+	rounds = 0;
+	endStatus.innerHTML = "";
+}
+
+function checkRoundOver() {
+	if (rounds === 5) {
+		rockButton.disabled = true;
+		paperButton.disabled = true;
+		scissorsButton.disabled = true;
+
+		if (userScore > compScore) {
+			endStatus.innerHTML = `You won. You are champion <b>🤩</b>. <p>Play Again?</p>`;
+		} else if (compScore > userScore) {
+			endStatus.innerHTML = `You loose. Better try next time <b>🤕</b>. <p>Play Again?</p>`;
+		} else {
+			endStatus.innerHTML = `it's  a draw to me <b>🥴</b>. <p>Play Again?</p>`;
+		}
+	}
 }
